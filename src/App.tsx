@@ -1,46 +1,15 @@
 import { useState } from "react";
 import "./App.css";
-import closedImg from "./assets/game/closed.svg";
-import flagImg from "./assets/game/flag.svg";
-import mineImg from "./assets/game/mine.svg";
-import mineRedImg from "./assets/game/mine_red.svg";
-import mineWrongImg from "./assets/game/mine_wrong.svg";
-import type0Img from "./assets/game/type0.svg";
-import type1Img from "./assets/game/type1.svg";
-import type2Img from "./assets/game/type2.svg";
-import type3Img from "./assets/game/type3.svg";
-import type4Img from "./assets/game/type4.svg";
-import type5Img from "./assets/game/type5.svg";
-import type6Img from "./assets/game/type6.svg";
-import type7Img from "./assets/game/type7.svg";
-import type8Img from "./assets/game/type8.svg";
-
-type CellState = "closed" | "opened" | "flagged";
-type Cell = {
-  isMine: boolean;
-  state: CellState;
-  adjacentMines: number;
-};
-
-const typeImages = [
-  type0Img,
-  type1Img,
-  type2Img,
-  type3Img,
-  type4Img,
-  type5Img,
-  type6Img,
-  type7Img,
-  type8Img,
-];
-
-type Difficulty = "beginner" | "intermediate" | "expert" | "custom";
-
-const DIFFICULTY_PRESETS = {
-  beginner: { rows: 9, cols: 9, mines: 10 },
-  intermediate: { rows: 16, cols: 16, mines: 40 },
-  expert: { rows: 16, cols: 30, mines: 99 },
-};
+import type { Cell, Difficulty } from "./game/types";
+import { DIFFICULTY_PRESETS } from "./game/constants";
+import {
+  initializeBoard,
+  openCell,
+  revealAllMines,
+  checkWin,
+} from "./game/gameLogic";
+import { GameBoard } from "./components/GameBoard";
+import { DifficultySettings } from "./components/DifficultySettings";
 
 function App() {
   const [difficulty, setDifficulty] = useState<Difficulty>("beginner");
@@ -72,97 +41,17 @@ function App() {
     else setMineCount(Math.min(Math.max(1, value), rows * cols - 9));
   };
 
-  const initializeBoard = (clickedRow: number, clickedCol: number) => {
-    const newBoard: Cell[][] = Array(rows)
-      .fill(null)
-      .map(() =>
-        Array(cols)
-          .fill(null)
-          .map(() => ({
-            isMine: false,
-            state: "closed" as CellState,
-            adjacentMines: 0,
-          }))
-      );
-
-    const mines = new Set<string>();
-    while (mines.size < mineCount) {
-      const r = Math.floor(Math.random() * rows);
-      const c = Math.floor(Math.random() * cols);
-      const key = `${r},${c}`;
-      if (r === clickedRow && c === clickedCol) continue;
-      if (
-        Math.abs(r - clickedRow) <= 1 &&
-        Math.abs(c - clickedCol) <= 1
-      )
-        continue;
-      mines.add(key);
-    }
-
-    mines.forEach((key) => {
-      const [r, c] = key.split(",").map(Number);
-      newBoard[r][c].isMine = true;
-    });
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (!newBoard[r][c].isMine) {
-          let count = 0;
-          for (let dr = -1; dr <= 1; dr++) {
-            for (let dc = -1; dc <= 1; dc++) {
-              if (dr === 0 && dc === 0) continue;
-              const nr = r + dr;
-              const nc = c + dc;
-              if (
-                nr >= 0 &&
-                nr < rows &&
-                nc >= 0 &&
-                nc < cols &&
-                newBoard[nr][nc].isMine
-              ) {
-                count++;
-              }
-            }
-          }
-          newBoard[r][c].adjacentMines = count;
-        }
-      }
-    }
-
-    return newBoard;
-  };
-
-  const openCell = (r: number, c: number, newBoard: Cell[][]) => {
-    if (
-      r < 0 ||
-      r >= rows ||
-      c < 0 ||
-      c >= cols ||
-      newBoard[r][c].state !== "closed"
-    )
-      return;
-
-    newBoard[r][c].state = "opened";
-
-    if (newBoard[r][c].adjacentMines === 0 && !newBoard[r][c].isMine) {
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          if (dr === 0 && dc === 0) continue;
-          openCell(r + dr, c + dc, newBoard);
-        }
-      }
-    }
-  };
-
   const handleCellClick = (r: number, c: number) => {
     if (gameOver || gameWon) return;
 
     if (firstClick) {
-      const newBoard = initializeBoard(r, c);
-      openCell(r, c, newBoard);
+      const newBoard = initializeBoard(rows, cols, mineCount, r, c);
+      openCell(r, c, newBoard, rows, cols);
       setBoard(newBoard);
       setFirstClick(false);
-      checkWin(newBoard);
+      if (checkWin(newBoard, rows, cols)) {
+        setGameWon(true);
+      }
       return;
     }
 
@@ -208,11 +97,11 @@ function App() {
             ) {
               if (newBoard[nr][nc].isMine) {
                 setGameOver(true);
-                revealAllMines(newBoard);
+                revealAllMines(newBoard, rows, cols);
                 setBoard(newBoard);
                 return;
               }
-              openCell(nr, nc, newBoard);
+              openCell(nr, nc, newBoard, rows, cols);
             }
           }
         }
@@ -221,14 +110,16 @@ function App() {
       if (newBoard[r][c].isMine) {
         setGameOver(true);
         newBoard[r][c].state = "opened";
-        revealAllMines(newBoard);
+        revealAllMines(newBoard, rows, cols);
       } else {
-        openCell(r, c, newBoard);
+        openCell(r, c, newBoard, rows, cols);
       }
     }
 
     setBoard(newBoard);
-    checkWin(newBoard);
+    if (checkWin(newBoard, rows, cols)) {
+      setGameWon(true);
+    }
   };
 
   const handleCellRightClick = (
@@ -250,60 +141,11 @@ function App() {
     setBoard(newBoard);
   };
 
-  const revealAllMines = (newBoard: Cell[][]) => {
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (newBoard[r][c].isMine && newBoard[r][c].state !== "flagged") {
-          newBoard[r][c].state = "opened";
-        }
-      }
-    }
-  };
-
-  const checkWin = (newBoard: Cell[][]) => {
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (!newBoard[r][c].isMine && newBoard[r][c].state !== "opened") {
-          return;
-        }
-      }
-    }
-    setGameWon(true);
-  };
-
   const resetGame = () => {
     setBoard(null);
     setGameOver(false);
     setGameWon(false);
     setFirstClick(true);
-  };
-
-  const getCellImage = (cell: Cell, r: number, c: number) => {
-    if (cell.state === "flagged") {
-      if (gameOver && !cell.isMine) {
-        return mineWrongImg;
-      }
-      return flagImg;
-    }
-    if (cell.state === "closed") return closedImg;
-    if (cell.isMine) {
-      if (gameOver && board) {
-        for (let i = 0; i < rows; i++) {
-          for (let j = 0; j < cols; j++) {
-            if (
-              board[i][j].state === "opened" &&
-              board[i][j].isMine &&
-              i === r &&
-              j === c
-            ) {
-              return mineRedImg;
-            }
-          }
-        }
-      }
-      return mineImg;
-    }
-    return typeImages[cell.adjacentMines];
   };
 
   return (
@@ -312,134 +154,38 @@ function App() {
 
       {!board && (
         <>
-          <div className="settings">
-            <div className="difficulty-buttons">
-              <button
-                className={difficulty === "beginner" ? "active" : ""}
-                onClick={() => handleDifficultyChange("beginner")}
-              >
-                初級 (9×9, 10)
-              </button>
-              <button
-                className={difficulty === "intermediate" ? "active" : ""}
-                onClick={() => handleDifficultyChange("intermediate")}
-              >
-                中級 (16×16, 40)
-              </button>
-              <button
-                className={difficulty === "expert" ? "active" : ""}
-                onClick={() => handleDifficultyChange("expert")}
-              >
-                上級 (16×30, 99)
-              </button>
-              <button
-                className={difficulty === "custom" ? "active" : ""}
-                onClick={() => handleDifficultyChange("custom")}
-              >
-                カスタム
-              </button>
-            </div>
-
-            {difficulty === "custom" && (
-              <div className="custom-settings">
-                <div>
-                  <label>
-                    Rows:
-                    <input
-                      type="number"
-                      value={rows}
-                      onChange={(e) =>
-                        handleCustomChange("rows", Number(e.target.value))
-                      }
-                      min="5"
-                      max="30"
-                    />
-                  </label>
-                </div>
-                <div>
-                  <label>
-                    Columns:
-                    <input
-                      type="number"
-                      value={cols}
-                      onChange={(e) =>
-                        handleCustomChange("cols", Number(e.target.value))
-                      }
-                      min="5"
-                      max="30"
-                    />
-                  </label>
-                </div>
-                <div>
-                  <label>
-                    Mines:
-                    <input
-                      type="number"
-                      value={mineCount}
-                      onChange={(e) =>
-                        handleCustomChange("mines", Number(e.target.value))
-                      }
-                      min="1"
-                      max={rows * cols - 9}
-                    />
-                  </label>
-                </div>
-              </div>
-            )}
-
-            <p className="instruction">👇 Click any cell below to start the game!</p>
-          </div>
+          <DifficultySettings
+            difficulty={difficulty}
+            rows={rows}
+            cols={cols}
+            mineCount={mineCount}
+            onDifficultyChange={handleDifficultyChange}
+            onCustomChange={handleCustomChange}
+          />
 
           <div className="game-area">
-            <div
-              className="board initial-board"
-              style={{
-                gridTemplateColumns: `repeat(${cols}, 32px)`,
-                gridTemplateRows: `repeat(${rows}, 32px)`,
-              }}
-            >
-              {Array(rows)
-                .fill(null)
-                .map((_, r) =>
-                  Array(cols)
-                    .fill(null)
-                    .map((_, c) => (
-                      <div
-                        key={`${r}-${c}`}
-                        className="cell initial-cell"
-                        onClick={() => handleCellClick(r, c)}
-                      >
-                        <img src={closedImg} alt="cell" />
-                      </div>
-                    ))
-                )}
-            </div>
+            <GameBoard
+              board={null}
+              rows={rows}
+              cols={cols}
+              gameOver={false}
+              onCellClick={handleCellClick}
+              onCellRightClick={handleCellRightClick}
+            />
           </div>
         </>
       )}
 
       {board && (
         <div className="game-area">
-          <div
-            className="board"
-            style={{
-              gridTemplateColumns: `repeat(${cols}, 32px)`,
-              gridTemplateRows: `repeat(${rows}, 32px)`,
-            }}
-          >
-            {board.map((row, r) =>
-              row.map((cell, c) => (
-                <div
-                  key={`${r}-${c}`}
-                  className="cell"
-                  onClick={() => handleCellClick(r, c)}
-                  onContextMenu={(e) => handleCellRightClick(e, r, c)}
-                >
-                  <img src={getCellImage(cell, r, c)} alt="cell" />
-                </div>
-              ))
-            )}
-          </div>
+          <GameBoard
+            board={board}
+            rows={rows}
+            cols={cols}
+            gameOver={gameOver}
+            onCellClick={handleCellClick}
+            onCellRightClick={handleCellRightClick}
+          />
 
           {gameOver && <div className="status">Game Over! 💥</div>}
           {gameWon && <div className="status">You Win! 🎉</div>}
