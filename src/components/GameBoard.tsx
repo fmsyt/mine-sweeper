@@ -1,4 +1,3 @@
-import type { Cell } from "../game/types";
 import closedImg from "../assets/game/closed.svg";
 import flagImg from "../assets/game/flag.svg";
 import mineImg from "../assets/game/mine.svg";
@@ -13,6 +12,7 @@ import type5Img from "../assets/game/type5.svg";
 import type6Img from "../assets/game/type6.svg";
 import type7Img from "../assets/game/type7.svg";
 import type8Img from "../assets/game/type8.svg";
+import type { Cell } from "../game/types";
 
 const typeImages = [
   type0Img,
@@ -41,7 +41,7 @@ const getCellImage = (
   c: number,
   board: Cell[][] | null,
   gameOver: boolean,
-  rows: number
+  rows: number,
 ) => {
   if (cell.state === "flagged") {
     if (gameOver && !cell.isMine) {
@@ -100,7 +100,7 @@ export function GameBoard({
                 >
                   <img src={closedImg} alt="cell" />
                 </div>
-              ))
+              )),
           )}
       </div>
     );
@@ -122,9 +122,12 @@ export function GameBoard({
             onClick={() => onCellClick(r, c)}
             onContextMenu={(e) => onCellRightClick(e, r, c)}
           >
-            <img src={getCellImage(cell, r, c, board, gameOver, rows)} alt="cell" />
+            <img
+              src={getCellImage(cell, r, c, board, gameOver, rows)}
+              alt="cell"
+            />
           </div>
-        ))
+        )),
       )}
     </div>
   );

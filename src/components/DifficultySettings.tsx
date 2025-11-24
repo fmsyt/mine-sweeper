@@ -78,7 +78,9 @@ export function DifficultySettings({
               <input
                 type="number"
                 value={mineCount}
-                onChange={(e) => onCustomChange("mines", Number(e.target.value))}
+                onChange={(e) =>
+                  onCustomChange("mines", Number(e.target.value))
+                }
                 min="1"
                 max={rows * cols - 9}
               />

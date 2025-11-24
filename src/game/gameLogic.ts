@@ -5,7 +5,7 @@ export const initializeBoard = (
   cols: number,
   mineCount: number,
   clickedRow: number,
-  clickedCol: number
+  clickedCol: number,
 ): Cell[][] => {
   const newBoard: Cell[][] = Array(rows)
     .fill(null)
@@ -16,7 +16,7 @@ export const initializeBoard = (
           isMine: false,
           state: "closed" as CellState,
           adjacentMines: 0,
-        }))
+        })),
     );
 
   const mines = new Set<string>();
@@ -68,7 +68,7 @@ export const openCell = (
   c: number,
   board: Cell[][],
   rows: number,
-  cols: number
+  cols: number,
 ): void => {
   if (
     r < 0 ||
@@ -94,7 +94,7 @@ export const openCell = (
 export const revealAllMines = (
   board: Cell[][],
   rows: number,
-  cols: number
+  cols: number,
 ): void => {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -105,7 +105,11 @@ export const revealAllMines = (
   }
 };
 
-export const checkWin = (board: Cell[][], rows: number, cols: number): boolean => {
+export const checkWin = (
+  board: Cell[][],
+  rows: number,
+  cols: number,
+): boolean => {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (!board[r][c].isMine && board[r][c].state !== "opened") {

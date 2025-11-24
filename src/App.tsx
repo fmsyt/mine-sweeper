@@ -1,15 +1,15 @@
 import { useState } from "react";
 import "./App.css";
-import type { Cell, Difficulty } from "./game/types";
+import { DifficultySettings } from "./components/DifficultySettings";
+import { GameBoard } from "./components/GameBoard";
 import { DIFFICULTY_PRESETS } from "./game/constants";
 import {
+  checkWin,
   initializeBoard,
   openCell,
   revealAllMines,
-  checkWin,
 } from "./game/gameLogic";
-import { GameBoard } from "./components/GameBoard";
-import { DifficultySettings } from "./components/DifficultySettings";
+import type { Cell, Difficulty } from "./game/types";
 
 function App() {
   const [difficulty, setDifficulty] = useState<Difficulty>("beginner");
@@ -33,7 +33,7 @@ function App() {
 
   const handleCustomChange = (
     type: "rows" | "cols" | "mines",
-    value: number
+    value: number,
   ) => {
     setDifficulty("custom");
     if (type === "rows") setRows(Math.max(5, value));
@@ -122,11 +122,7 @@ function App() {
     }
   };
 
-  const handleCellRightClick = (
-    e: React.MouseEvent,
-    r: number,
-    c: number
-  ) => {
+  const handleCellRightClick = (e: React.MouseEvent, r: number, c: number) => {
     e.preventDefault();
     if (gameOver || gameWon || !board || firstClick) return;
 
