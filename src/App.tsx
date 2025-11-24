@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { DifficultySettings } from "./components/DifficultySettings";
 import { GameBoard } from "./components/GameBoard";
+import { GameStatus } from "./components/GameStatus";
 import { DIFFICULTY_PRESETS } from "./game/constants";
 import {
   checkWin,
@@ -20,6 +21,20 @@ function App() {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [firstClick, setFirstClick] = useState(true);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [flagCount, setFlagCount] = useState(0);
+
+  useEffect(() => {
+    if (!board || gameOver || gameWon || firstClick) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setElapsedTime((prev) => Math.min(prev + 1, 999));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [board, gameOver, gameWon, firstClick]);
 
   const handleDifficultyChange = (newDifficulty: Difficulty) => {
     setDifficulty(newDifficulty);
@@ -49,6 +64,7 @@ function App() {
       openCell(r, c, newBoard, rows, cols);
       setBoard(newBoard);
       setFirstClick(false);
+      setElapsedTime(0);
       if (checkWin(newBoard, rows, cols)) {
         setGameWon(true);
       }
@@ -130,8 +146,10 @@ function App() {
 
     if (newBoard[r][c].state === "closed") {
       newBoard[r][c].state = "flagged";
+      setFlagCount((prev) => prev + 1);
     } else if (newBoard[r][c].state === "flagged") {
       newBoard[r][c].state = "closed";
+      setFlagCount((prev) => prev - 1);
     }
 
     setBoard(newBoard);
@@ -142,6 +160,8 @@ function App() {
     setGameOver(false);
     setGameWon(false);
     setFirstClick(true);
+    setElapsedTime(0);
+    setFlagCount(0);
   };
 
   return (
@@ -174,6 +194,11 @@ function App() {
 
       {board && (
         <div className="game-area">
+          <GameStatus
+            minesRemaining={mineCount - flagCount}
+            elapsedTime={elapsedTime}
+          />
+
           <GameBoard
             board={board}
             rows={rows}
@@ -186,7 +211,7 @@ function App() {
           {gameOver && <div className="status">Game Over! 💥</div>}
           {gameWon && <div className="status">You Win! 🎉</div>}
 
-          <button onClick={resetGame} className="reset-btn">
+          <button type="button" onClick={resetGame} className="reset-btn">
             New Game
           </button>
         </div>

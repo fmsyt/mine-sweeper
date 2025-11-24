@@ -21,24 +21,28 @@ export function DifficultySettings({
     <div className="settings">
       <div className="difficulty-buttons">
         <button
+          type="button"
           className={difficulty === "beginner" ? "active" : ""}
           onClick={() => onDifficultyChange("beginner")}
         >
           初級 (9×9, 10)
         </button>
         <button
+          type="button"
           className={difficulty === "intermediate" ? "active" : ""}
           onClick={() => onDifficultyChange("intermediate")}
         >
           中級 (16×16, 40)
         </button>
         <button
+          type="button"
           className={difficulty === "expert" ? "active" : ""}
           onClick={() => onDifficultyChange("expert")}
         >
           上級 (16×30, 99)
         </button>
         <button
+          type="button"
           className={difficulty === "custom" ? "active" : ""}
           onClick={() => onDifficultyChange("custom")}
         >

@@ -93,13 +93,14 @@ export function GameBoard({
             Array(cols)
               .fill(null)
               .map((_, c) => (
-                <div
+                <button
+                  type="button"
                   key={`${r}-${c}`}
                   className="cell initial-cell"
                   onClick={() => onCellClick(r, c)}
                 >
                   <img src={closedImg} alt="cell" />
-                </div>
+                </button>
               )),
           )}
       </div>
@@ -116,7 +117,8 @@ export function GameBoard({
     >
       {board.map((row, r) =>
         row.map((cell, c) => (
-          <div
+          <button
+            type="button"
             key={`${r}-${c}`}
             className="cell"
             onClick={() => onCellClick(r, c)}
@@ -126,7 +128,7 @@ export function GameBoard({
               src={getCellImage(cell, r, c, board, gameOver, rows)}
               alt="cell"
             />
-          </div>
+          </button>
         )),
       )}
     </div>

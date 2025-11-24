@@ -141,6 +141,10 @@ input {
   cursor: pointer;
   user-select: none;
   transition: filter 0.1s ease;
+  padding: 0;
+  border: none;
+  background: none;
+  outline: none;
 }
 
 .cell:hover {
@@ -159,6 +163,30 @@ input {
   color: #396cd8;
   margin-top: 1rem;
   animation: pulse 2s ease-in-out infinite;
+}
+
+.game-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background-color: #c0c0c0;
+  border: 2px solid #396cd8;
+  margin-bottom: 0.5rem;
+}
+
+.digit-display {
+  display: flex;
+  gap: 2px;
+  background-color: #000;
+  padding: 4px;
+}
+
+.digit {
+  width: 24px;
+  height: 36px;
+  display: block;
 }
 
 @keyframes pulse {
