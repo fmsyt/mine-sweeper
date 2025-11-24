@@ -69,18 +69,54 @@ input {
 .settings {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   margin: 2rem 0;
 }
 
-.settings label {
+.difficulty-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.difficulty-buttons button {
+  padding: 0.8em 1.5em;
+  font-size: 1rem;
+  background-color: #ffffff;
+  color: #0f0f0f;
+  border: 2px solid #396cd8;
+  transition: all 0.2s ease;
+}
+
+.difficulty-buttons button.active {
+  background-color: #396cd8;
+  color: white;
+  font-weight: 600;
+}
+
+.difficulty-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.custom-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: rgba(57, 108, 216, 0.1);
+  border-radius: 8px;
+}
+
+.custom-settings label {
   display: flex;
   align-items: center;
   gap: 1rem;
   font-size: 1.2rem;
 }
 
-.settings input {
+.custom-settings input {
   width: 100px;
 }
 
@@ -213,5 +249,20 @@ input {
 
   .instruction {
     color: #ffd700;
+  }
+
+  .difficulty-buttons button {
+    background-color: #0f0f0f98;
+    color: #ffffff;
+    border-color: #646cff;
+  }
+
+  .difficulty-buttons button.active {
+    background-color: #646cff;
+    color: white;
+  }
+
+  .custom-settings {
+    background-color: rgba(100, 108, 255, 0.2);
   }
 }

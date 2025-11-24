@@ -4,6 +4,7 @@ import closedImg from "./assets/game/closed.svg";
 import flagImg from "./assets/game/flag.svg";
 import mineImg from "./assets/game/mine.svg";
 import mineRedImg from "./assets/game/mine_red.svg";
+import mineWrongImg from "./assets/game/mine_wrong.svg";
 import type0Img from "./assets/game/type0.svg";
 import type1Img from "./assets/game/type1.svg";
 import type2Img from "./assets/game/type2.svg";
@@ -33,14 +34,43 @@ const typeImages = [
   type8Img,
 ];
 
+type Difficulty = "beginner" | "intermediate" | "expert" | "custom";
+
+const DIFFICULTY_PRESETS = {
+  beginner: { rows: 9, cols: 9, mines: 10 },
+  intermediate: { rows: 16, cols: 16, mines: 40 },
+  expert: { rows: 16, cols: 30, mines: 99 },
+};
+
 function App() {
-  const [rows, setRows] = useState(10);
-  const [cols, setCols] = useState(10);
+  const [difficulty, setDifficulty] = useState<Difficulty>("beginner");
+  const [rows, setRows] = useState(9);
+  const [cols, setCols] = useState(9);
   const [mineCount, setMineCount] = useState(10);
   const [board, setBoard] = useState<Cell[][] | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [firstClick, setFirstClick] = useState(true);
+
+  const handleDifficultyChange = (newDifficulty: Difficulty) => {
+    setDifficulty(newDifficulty);
+    if (newDifficulty !== "custom") {
+      const preset = DIFFICULTY_PRESETS[newDifficulty];
+      setRows(preset.rows);
+      setCols(preset.cols);
+      setMineCount(preset.mines);
+    }
+  };
+
+  const handleCustomChange = (
+    type: "rows" | "cols" | "mines",
+    value: number
+  ) => {
+    setDifficulty("custom");
+    if (type === "rows") setRows(Math.max(5, value));
+    else if (type === "cols") setCols(Math.max(5, value));
+    else setMineCount(Math.min(Math.max(1, value), rows * cols - 9));
+  };
 
   const initializeBoard = (clickedRow: number, clickedCol: number) => {
     const newBoard: Cell[][] = Array(rows)
@@ -223,7 +253,7 @@ function App() {
   const revealAllMines = (newBoard: Cell[][]) => {
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        if (newBoard[r][c].isMine) {
+        if (newBoard[r][c].isMine && newBoard[r][c].state !== "flagged") {
           newBoard[r][c].state = "opened";
         }
       }
@@ -249,7 +279,12 @@ function App() {
   };
 
   const getCellImage = (cell: Cell, r: number, c: number) => {
-    if (cell.state === "flagged") return flagImg;
+    if (cell.state === "flagged") {
+      if (gameOver && !cell.isMine) {
+        return mineWrongImg;
+      }
+      return flagImg;
+    }
     if (cell.state === "closed") return closedImg;
     if (cell.isMine) {
       if (gameOver && board) {
@@ -278,49 +313,80 @@ function App() {
       {!board && (
         <>
           <div className="settings">
-            <div>
-              <label>
-                Rows:
-                <input
-                  type="number"
-                  value={rows}
-                  onChange={(e) => setRows(Math.max(5, Number(e.target.value)))}
-                  min="5"
-                  max="30"
-                />
-              </label>
+            <div className="difficulty-buttons">
+              <button
+                className={difficulty === "beginner" ? "active" : ""}
+                onClick={() => handleDifficultyChange("beginner")}
+              >
+                初級 (9×9, 10)
+              </button>
+              <button
+                className={difficulty === "intermediate" ? "active" : ""}
+                onClick={() => handleDifficultyChange("intermediate")}
+              >
+                中級 (16×16, 40)
+              </button>
+              <button
+                className={difficulty === "expert" ? "active" : ""}
+                onClick={() => handleDifficultyChange("expert")}
+              >
+                上級 (16×30, 99)
+              </button>
+              <button
+                className={difficulty === "custom" ? "active" : ""}
+                onClick={() => handleDifficultyChange("custom")}
+              >
+                カスタム
+              </button>
             </div>
-            <div>
-              <label>
-                Columns:
-                <input
-                  type="number"
-                  value={cols}
-                  onChange={(e) => setCols(Math.max(5, Number(e.target.value)))}
-                  min="5"
-                  max="30"
-                />
-              </label>
-            </div>
-            <div>
-              <label>
-                Mines:
-                <input
-                  type="number"
-                  value={mineCount}
-                  onChange={(e) =>
-                    setMineCount(
-                      Math.min(
-                        Math.max(1, Number(e.target.value)),
-                        rows * cols - 9
-                      )
-                    )
-                  }
-                  min="1"
-                  max={rows * cols - 9}
-                />
-              </label>
-            </div>
+
+            {difficulty === "custom" && (
+              <div className="custom-settings">
+                <div>
+                  <label>
+                    Rows:
+                    <input
+                      type="number"
+                      value={rows}
+                      onChange={(e) =>
+                        handleCustomChange("rows", Number(e.target.value))
+                      }
+                      min="5"
+                      max="30"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    Columns:
+                    <input
+                      type="number"
+                      value={cols}
+                      onChange={(e) =>
+                        handleCustomChange("cols", Number(e.target.value))
+                      }
+                      min="5"
+                      max="30"
+                    />
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    Mines:
+                    <input
+                      type="number"
+                      value={mineCount}
+                      onChange={(e) =>
+                        handleCustomChange("mines", Number(e.target.value))
+                      }
+                      min="1"
+                      max={rows * cols - 9}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+
             <p className="instruction">👇 Click any cell below to start the game!</p>
           </div>
 
