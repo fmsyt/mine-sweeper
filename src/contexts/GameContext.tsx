@@ -34,7 +34,7 @@ interface GameContextType {
   toggleFlagAnimation: () => void;
   setHoldToFlagDurationMs: (value: number) => void;
   handleCellClick: (r: number, c: number) => void;
-  handleCellRightClick: (e: React.MouseEvent, r: number, c: number) => void;
+  handleCellRightClick: (r: number, c: number) => void;
   resetGame: () => void;
 }
 
@@ -198,8 +198,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleCellRightClick = (e: React.MouseEvent, r: number, c: number) => {
-    e.preventDefault();
+  const handleCellRightClick = (r: number, c: number) => {
     if (gameOver || gameWon || !board || firstClick) return;
 
     const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));

@@ -80,21 +80,18 @@ export function GameBoard() {
   const longPressTimer = useRef<number | null>(null);
   const longPressTriggered = useRef<boolean>(false);
 
-  const handleMouseDown = (r: number, c: number) => {
+  const handlePointerDown = (r: number, c: number) => {
     mouseDownTime.current = Date.now();
     mouseDownCell.current = { r, c };
     longPressTriggered.current = false;
 
     longPressTimer.current = window.setTimeout(() => {
       longPressTriggered.current = true;
-      const syntheticEvent = {
-        preventDefault: () => {},
-      } as React.MouseEvent;
-      handleCellRightClick(syntheticEvent, r, c);
+      handleCellRightClick(r, c);
     }, holdToFlagDurationMs);
   };
 
-  const handleMouseUp = (r: number, c: number) => {
+  const handlePointerUp = (r: number, c: number) => {
     if (longPressTimer.current !== null) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -112,6 +109,17 @@ export function GameBoard() {
     mouseDownTime.current = null;
     mouseDownCell.current = null;
     longPressTriggered.current = false;
+  };
+  const handleMouseUp = (r: number, c: number) => {
+    if (longPressTimer.current !== null) {
+      clearTimeout(longPressTimer.current);
+    }
+
+    handleCellRightClick(r, c);
+
+    longPressTriggered.current = false;
+    mouseDownTime.current = null;
+    mouseDownCell.current = null;
   };
 
   if (!board) {
@@ -133,8 +141,8 @@ export function GameBoard() {
                   type="button"
                   key={`${r}-${c}`}
                   className="cell initial-cell"
-                  onMouseDown={() => handleMouseDown(r, c)}
-                  onMouseUp={() => handleMouseUp(r, c)}
+                  onMouseDown={() => handlePointerDown(r, c)}
+                  onMouseUp={() => handlePointerUp(r, c)}
                 >
                   <img src={closedImg} alt="cell" />
                 </button>
@@ -161,9 +169,33 @@ export function GameBoard() {
               type="button"
               key={cellKey}
               className="cell"
-              onPointerDown={() => handleMouseDown(r, c)}
-              onPointerUp={() => handleMouseUp(r, c)}
-              onContextMenu={(e) => handleCellRightClick(e, r, c)}
+              onMouseDown={(e) => {
+                handlePointerDown(r, c);
+              }}
+              onMouseUp={(e) => {
+                if (e.button === 2) {
+                  handleMouseUp(r, c);
+                } else {
+                  handlePointerUp(r, c);
+                }
+              }}
+              onPointerDown={(e) => {
+                if (e.pointerType === "mouse") {
+                  return;
+                }
+                e.preventDefault();
+                handlePointerDown(r, c);
+              }}
+              onPointerUp={(e) => {
+                if (e.pointerType === "mouse") {
+                  return;
+                }
+                e.preventDefault();
+                handlePointerUp(r, c);
+              }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+              }}
             >
               <img
                 src={getCellImage(cell, r, c, board, gameOver, rows)}
