@@ -162,7 +162,7 @@ input {
 }
 
 .flag-drop {
-  animation: flagDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: flagDrop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes flagDrop {
@@ -170,15 +170,18 @@ input {
     transform: translateY(-100%) scale(0.5);
     opacity: 0;
   }
+
   60% {
-    transform: translateY(5%) scale(1.1);
+    transform: scale(2);
     opacity: 1;
   }
+
   80% {
-    transform: translateY(-2%) scale(0.95);
+    transform: scale(0.95);
   }
+
   100% {
-    transform: translateY(0) scale(1);
+    transform: scale(1);
     opacity: 1;
   }
 }
@@ -216,6 +219,7 @@ input {
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 1;
