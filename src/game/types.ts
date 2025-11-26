@@ -12,4 +12,6 @@ export type GameConfig = {
   rows: number;
   cols: number;
   mines: number;
+
+  showFlagAnimation?: boolean;
 };

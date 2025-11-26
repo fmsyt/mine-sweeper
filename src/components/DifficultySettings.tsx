@@ -6,8 +6,10 @@ export function DifficultySettings() {
     rows,
     cols,
     mineCount,
+    showFlagAnimation,
     handleDifficultyChange,
     handleCustomChange,
+    toggleFlagAnimation,
   } = useGame();
   return (
     <div className="settings">
@@ -88,6 +90,17 @@ export function DifficultySettings() {
           </div>
         </div>
       )}
+
+      <div className="animation-toggle">
+        <label>
+          <input
+            type="checkbox"
+            checked={showFlagAnimation}
+            onChange={toggleFlagAnimation}
+          />
+          フラグアニメーション
+        </label>
+      </div>
 
       <p className="instruction">👇 Click any cell below to start the game!</p>
     </div>

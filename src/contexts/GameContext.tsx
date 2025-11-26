@@ -25,9 +25,11 @@ interface GameContextType {
   firstClick: boolean;
   elapsedTime: number;
   flagCount: number;
+  showFlagAnimation: boolean;
   animatingFlags: Set<string>;
   handleDifficultyChange: (newDifficulty: Difficulty) => void;
   handleCustomChange: (type: "rows" | "cols" | "mines", value: number) => void;
+  toggleFlagAnimation: () => void;
   handleCellClick: (r: number, c: number) => void;
   handleCellRightClick: (e: React.MouseEvent, r: number, c: number) => void;
   resetGame: () => void;
@@ -46,6 +48,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [firstClick, setFirstClick] = useState(true);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [flagCount, setFlagCount] = useState(0);
+  const [showFlagAnimation, setShowFlagAnimation] = useState(true);
   const [animatingFlags, setAnimatingFlags] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -78,6 +81,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (type === "rows") setRows(Math.max(5, value));
     else if (type === "cols") setCols(Math.max(5, value));
     else setMineCount(Math.min(Math.max(1, value), rows * cols - 9));
+  };
+
+  const toggleFlagAnimation = () => {
+    setShowFlagAnimation((prev) => !prev);
   };
 
   const handleCellClick = (r: number, c: number) => {
@@ -173,14 +180,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
       newBoard[r][c].state = "flagged";
       setFlagCount((prev) => prev + 1);
 
-      setAnimatingFlags((prev) => new Set(prev).add(cellKey));
-      setTimeout(() => {
-        setAnimatingFlags((prev) => {
-          const next = new Set(prev);
-          next.delete(cellKey);
-          return next;
-        });
-      }, 400);
+      if (showFlagAnimation) {
+        setAnimatingFlags((prev) => new Set(prev).add(cellKey));
+        setTimeout(() => {
+          setAnimatingFlags((prev) => {
+            const next = new Set(prev);
+            next.delete(cellKey);
+            return next;
+          });
+        }, 400);
+      }
     } else if (newBoard[r][c].state === "flagged") {
       newBoard[r][c].state = "closed";
       setFlagCount((prev) => prev - 1);
@@ -212,9 +221,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
         firstClick,
         elapsedTime,
         flagCount,
+        showFlagAnimation,
         animatingFlags,
         handleDifficultyChange,
         handleCustomChange,
+        toggleFlagAnimation,
         handleCellClick,
         handleCellRightClick,
         resetGame,
