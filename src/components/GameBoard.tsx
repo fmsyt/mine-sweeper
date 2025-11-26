@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import closedImg from "../assets/game/closed.svg";
 import flagImg from "../assets/game/flag.svg";
 import mineImg from "../assets/game/mine.svg";
@@ -65,6 +66,31 @@ const getCellImage = (
 export function GameBoard() {
   const { board, rows, cols, gameOver, handleCellClick, handleCellRightClick } =
     useGame();
+  const mouseDownTime = useRef<number | null>(null);
+  const mouseDownCell = useRef<{ r: number; c: number } | null>(null);
+
+  const handleMouseDown = (r: number, c: number) => {
+    mouseDownTime.current = Date.now();
+    mouseDownCell.current = { r, c };
+  };
+
+  const handleMouseUp = (e: React.MouseEvent, r: number, c: number) => {
+    if (
+      mouseDownTime.current !== null &&
+      mouseDownCell.current?.r === r &&
+      mouseDownCell.current?.c === c
+    ) {
+      const duration = Date.now() - mouseDownTime.current;
+      if (duration >= 500) {
+        handleCellRightClick(e, r, c);
+      } else {
+        handleCellClick(r, c);
+      }
+    }
+    mouseDownTime.current = null;
+    mouseDownCell.current = null;
+  };
+
   if (!board) {
     return (
       <div
@@ -84,7 +110,8 @@ export function GameBoard() {
                   type="button"
                   key={`${r}-${c}`}
                   className="cell initial-cell"
-                  onClick={() => handleCellClick(r, c)}
+                  onMouseDown={() => handleMouseDown(r, c)}
+                  onMouseUp={(e) => handleMouseUp(e, r, c)}
                 >
                   <img src={closedImg} alt="cell" />
                 </button>
@@ -108,7 +135,8 @@ export function GameBoard() {
             type="button"
             key={`${r}-${c}`}
             className="cell"
-            onClick={() => handleCellClick(r, c)}
+            onMouseDown={() => handleMouseDown(r, c)}
+            onMouseUp={(e) => handleMouseUp(e, r, c)}
             onContextMenu={(e) => handleCellRightClick(e, r, c)}
           >
             <img
