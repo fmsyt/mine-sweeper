@@ -14,8 +14,10 @@
     "check:fix": "biome check --write ./src"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.17",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.7",
