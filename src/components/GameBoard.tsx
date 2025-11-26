@@ -12,6 +12,7 @@ import type5Img from "../assets/game/type5.svg";
 import type6Img from "../assets/game/type6.svg";
 import type7Img from "../assets/game/type7.svg";
 import type8Img from "../assets/game/type8.svg";
+import { useGame } from "../contexts/GameContext";
 import type { Cell } from "../game/types";
 
 const typeImages = [
@@ -25,15 +26,6 @@ const typeImages = [
   type7Img,
   type8Img,
 ];
-
-interface GameBoardProps {
-  board: Cell[][] | null;
-  rows: number;
-  cols: number;
-  gameOver: boolean;
-  onCellClick: (r: number, c: number) => void;
-  onCellRightClick: (e: React.MouseEvent, r: number, c: number) => void;
-}
 
 const getCellImage = (
   cell: Cell,
@@ -70,14 +62,9 @@ const getCellImage = (
   return typeImages[cell.adjacentMines];
 };
 
-export function GameBoard({
-  board,
-  rows,
-  cols,
-  gameOver,
-  onCellClick,
-  onCellRightClick,
-}: GameBoardProps) {
+export function GameBoard() {
+  const { board, rows, cols, gameOver, handleCellClick, handleCellRightClick } =
+    useGame();
   if (!board) {
     return (
       <div
@@ -97,7 +84,7 @@ export function GameBoard({
                   type="button"
                   key={`${r}-${c}`}
                   className="cell initial-cell"
-                  onClick={() => onCellClick(r, c)}
+                  onClick={() => handleCellClick(r, c)}
                 >
                   <img src={closedImg} alt="cell" />
                 </button>
@@ -121,8 +108,8 @@ export function GameBoard({
             type="button"
             key={`${r}-${c}`}
             className="cell"
-            onClick={() => onCellClick(r, c)}
-            onContextMenu={(e) => onCellRightClick(e, r, c)}
+            onClick={() => handleCellClick(r, c)}
+            onContextMenu={(e) => handleCellRightClick(e, r, c)}
           >
             <img
               src={getCellImage(cell, r, c, board, gameOver, rows)}

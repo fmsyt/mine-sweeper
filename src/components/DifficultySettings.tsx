@@ -1,50 +1,42 @@
-import type { Difficulty } from "../game/types";
+import { useGame } from "../contexts/GameContext";
 
-interface DifficultySettingsProps {
-  difficulty: Difficulty;
-  rows: number;
-  cols: number;
-  mineCount: number;
-  onDifficultyChange: (difficulty: Difficulty) => void;
-  onCustomChange: (type: "rows" | "cols" | "mines", value: number) => void;
-}
-
-export function DifficultySettings({
-  difficulty,
-  rows,
-  cols,
-  mineCount,
-  onDifficultyChange,
-  onCustomChange,
-}: DifficultySettingsProps) {
+export function DifficultySettings() {
+  const {
+    difficulty,
+    rows,
+    cols,
+    mineCount,
+    handleDifficultyChange,
+    handleCustomChange,
+  } = useGame();
   return (
     <div className="settings">
       <div className="difficulty-buttons">
         <button
           type="button"
           className={difficulty === "beginner" ? "active" : ""}
-          onClick={() => onDifficultyChange("beginner")}
+          onClick={() => handleDifficultyChange("beginner")}
         >
           初級 (9×9, 10)
         </button>
         <button
           type="button"
           className={difficulty === "intermediate" ? "active" : ""}
-          onClick={() => onDifficultyChange("intermediate")}
+          onClick={() => handleDifficultyChange("intermediate")}
         >
           中級 (16×16, 40)
         </button>
         <button
           type="button"
           className={difficulty === "expert" ? "active" : ""}
-          onClick={() => onDifficultyChange("expert")}
+          onClick={() => handleDifficultyChange("expert")}
         >
           上級 (16×30, 99)
         </button>
         <button
           type="button"
           className={difficulty === "custom" ? "active" : ""}
-          onClick={() => onDifficultyChange("custom")}
+          onClick={() => handleDifficultyChange("custom")}
         >
           カスタム
         </button>
@@ -58,7 +50,9 @@ export function DifficultySettings({
               <input
                 type="number"
                 value={rows}
-                onChange={(e) => onCustomChange("rows", Number(e.target.value))}
+                onChange={(e) =>
+                  handleCustomChange("rows", Number(e.target.value))
+                }
                 min="5"
                 max="30"
               />
@@ -70,7 +64,9 @@ export function DifficultySettings({
               <input
                 type="number"
                 value={cols}
-                onChange={(e) => onCustomChange("cols", Number(e.target.value))}
+                onChange={(e) =>
+                  handleCustomChange("cols", Number(e.target.value))
+                }
                 min="5"
                 max="30"
               />
@@ -83,7 +79,7 @@ export function DifficultySettings({
                 type="number"
                 value={mineCount}
                 onChange={(e) =>
-                  onCustomChange("mines", Number(e.target.value))
+                  handleCustomChange("mines", Number(e.target.value))
                 }
                 min="1"
                 max={rows * cols - 9}
