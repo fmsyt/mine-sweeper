@@ -14,4 +14,5 @@ export type GameConfig = {
   mines: number;
 
   showFlagAnimation?: boolean;
+  holdToFlagDurationMs?: number;
 };

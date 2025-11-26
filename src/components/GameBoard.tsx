@@ -70,6 +70,7 @@ export function GameBoard() {
     rows,
     cols,
     gameOver,
+    holdToFlagDurationMs,
     animatingFlags,
     handleCellClick,
     handleCellRightClick,
@@ -87,10 +88,10 @@ export function GameBoard() {
     longPressTimer.current = window.setTimeout(() => {
       longPressTriggered.current = true;
       const syntheticEvent = {
-        preventDefault: () => { },
+        preventDefault: () => {},
       } as React.MouseEvent;
       handleCellRightClick(syntheticEvent, r, c);
-    }, 500);
+    }, holdToFlagDurationMs);
   };
 
   const handleMouseUp = (r: number, c: number) => {

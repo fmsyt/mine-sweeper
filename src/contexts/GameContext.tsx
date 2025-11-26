@@ -26,10 +26,12 @@ interface GameContextType {
   elapsedTime: number;
   flagCount: number;
   showFlagAnimation: boolean;
+  holdToFlagDurationMs: number;
   animatingFlags: Set<string>;
   handleDifficultyChange: (newDifficulty: Difficulty) => void;
   handleCustomChange: (type: "rows" | "cols" | "mines", value: number) => void;
   toggleFlagAnimation: () => void;
+  setHoldToFlagDurationMs: (value: number) => void;
   handleCellClick: (r: number, c: number) => void;
   handleCellRightClick: (e: React.MouseEvent, r: number, c: number) => void;
   resetGame: () => void;
@@ -49,6 +51,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [flagCount, setFlagCount] = useState(0);
   const [showFlagAnimation, setShowFlagAnimation] = useState(true);
+  const [holdToFlagDurationMs, setHoldToFlagDurationMs] = useState(500);
   const [animatingFlags, setAnimatingFlags] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -222,10 +225,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
         elapsedTime,
         flagCount,
         showFlagAnimation,
+        holdToFlagDurationMs,
         animatingFlags,
         handleDifficultyChange,
         handleCustomChange,
         toggleFlagAnimation,
+        setHoldToFlagDurationMs,
         handleCellClick,
         handleCellRightClick,
         resetGame,

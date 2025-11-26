@@ -7,9 +7,11 @@ export function DifficultySettings() {
     cols,
     mineCount,
     showFlagAnimation,
+    holdToFlagDurationMs,
     handleDifficultyChange,
     handleCustomChange,
     toggleFlagAnimation,
+    setHoldToFlagDurationMs,
   } = useGame();
   return (
     <div className="settings">
@@ -99,6 +101,20 @@ export function DifficultySettings() {
             onChange={toggleFlagAnimation}
           />
           フラグアニメーション
+        </label>
+      </div>
+
+      <div className="hold-duration-setting">
+        <label>
+          長押し時間: {holdToFlagDurationMs}ms
+          <input
+            type="range"
+            value={holdToFlagDurationMs}
+            onChange={(e) => setHoldToFlagDurationMs(Number(e.target.value))}
+            min="100"
+            max="2000"
+            step="50"
+          />
         </label>
       </div>
 
