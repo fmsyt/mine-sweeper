@@ -13,6 +13,7 @@ import {
   revealAllMines,
 } from "../game/gameLogic";
 import type { Cell, Difficulty } from "../game/types";
+import { useLocalStorage } from "./LocalStorageContext";
 
 interface GameContextType {
   difficulty: Difficulty;
@@ -40,18 +41,24 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
+  const { config, updateConfig } = useLocalStorage();
+
   const [difficulty, setDifficulty] = useState<Difficulty>("beginner");
-  const [rows, setRows] = useState(9);
-  const [cols, setCols] = useState(9);
-  const [mineCount, setMineCount] = useState(10);
+  const [rows, setRows] = useState(config.rows);
+  const [cols, setCols] = useState(config.cols);
+  const [mineCount, setMineCount] = useState(config.mines);
   const [board, setBoard] = useState<Cell[][] | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [firstClick, setFirstClick] = useState(true);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [flagCount, setFlagCount] = useState(0);
-  const [showFlagAnimation, setShowFlagAnimation] = useState(true);
-  const [holdToFlagDurationMs, setHoldToFlagDurationMs] = useState(500);
+  const [showFlagAnimation, setShowFlagAnimation] = useState(
+    config.showFlagAnimation ?? true,
+  );
+  const [holdToFlagDurationMs, setHoldToFlagDurationMs] = useState(
+    config.holdToFlagDurationMs ?? 500,
+  );
   const [animatingFlags, setAnimatingFlags] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -81,13 +88,32 @@ export function GameProvider({ children }: { children: ReactNode }) {
     value: number,
   ) => {
     setDifficulty("custom");
-    if (type === "rows") setRows(Math.max(5, value));
-    else if (type === "cols") setCols(Math.max(5, value));
-    else setMineCount(Math.min(Math.max(1, value), rows * cols - 9));
+    if (type === "rows") {
+      const newRows = Math.max(5, value);
+      setRows(newRows);
+      updateConfig({ rows: newRows });
+    } else if (type === "cols") {
+      const newCols = Math.max(5, value);
+      setCols(newCols);
+      updateConfig({ cols: newCols });
+    } else {
+      const newMines = Math.min(Math.max(1, value), rows * cols - 9);
+      setMineCount(newMines);
+      updateConfig({ mines: newMines });
+    }
   };
 
   const toggleFlagAnimation = () => {
-    setShowFlagAnimation((prev) => !prev);
+    setShowFlagAnimation((prev) => {
+      const newValue = !prev;
+      updateConfig({ showFlagAnimation: newValue });
+      return newValue;
+    });
+  };
+
+  const handleSetHoldToFlagDurationMs = (value: number) => {
+    setHoldToFlagDurationMs(value);
+    updateConfig({ holdToFlagDurationMs: value });
   };
 
   const handleCellClick = (r: number, c: number) => {
@@ -230,7 +256,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         handleDifficultyChange,
         handleCustomChange,
         toggleFlagAnimation,
-        setHoldToFlagDurationMs,
+        setHoldToFlagDurationMs: handleSetHoldToFlagDurationMs,
         handleCellClick,
         handleCellRightClick,
         resetGame,
