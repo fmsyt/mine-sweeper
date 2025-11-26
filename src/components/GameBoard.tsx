@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 import { useRef } from "react";
 import closedImg from "../assets/game/closed.svg";
 import flagImg from "../assets/game/flag.svg";
@@ -149,8 +150,8 @@ export function GameBoard() {
             type="button"
             key={`${r}-${c}`}
             className="cell"
-            onMouseDown={() => handleMouseDown(r, c)}
-            onMouseUp={() => handleMouseUp(r, c)}
+            onPointerDown={() => handleMouseDown(r, c)}
+            onPointerUp={() => handleMouseUp(r, c)}
             onContextMenu={(e) => handleCellRightClick(e, r, c)}
           >
             <img
