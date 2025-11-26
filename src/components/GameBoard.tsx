@@ -68,27 +68,41 @@ export function GameBoard() {
     useGame();
   const mouseDownTime = useRef<number | null>(null);
   const mouseDownCell = useRef<{ r: number; c: number } | null>(null);
+  const longPressTimer = useRef<number | null>(null);
+  const longPressTriggered = useRef<boolean>(false);
 
   const handleMouseDown = (r: number, c: number) => {
     mouseDownTime.current = Date.now();
     mouseDownCell.current = { r, c };
+    longPressTriggered.current = false;
+
+    longPressTimer.current = window.setTimeout(() => {
+      longPressTriggered.current = true;
+      const syntheticEvent = {
+        preventDefault: () => {},
+      } as React.MouseEvent;
+      handleCellRightClick(syntheticEvent, r, c);
+    }, 500);
   };
 
-  const handleMouseUp = (e: React.MouseEvent, r: number, c: number) => {
+  const handleMouseUp = (r: number, c: number) => {
+    if (longPressTimer.current !== null) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+
     if (
+      !longPressTriggered.current &&
       mouseDownTime.current !== null &&
       mouseDownCell.current?.r === r &&
       mouseDownCell.current?.c === c
     ) {
-      const duration = Date.now() - mouseDownTime.current;
-      if (duration >= 500) {
-        handleCellRightClick(e, r, c);
-      } else {
-        handleCellClick(r, c);
-      }
+      handleCellClick(r, c);
     }
+
     mouseDownTime.current = null;
     mouseDownCell.current = null;
+    longPressTriggered.current = false;
   };
 
   if (!board) {
@@ -111,7 +125,7 @@ export function GameBoard() {
                   key={`${r}-${c}`}
                   className="cell initial-cell"
                   onMouseDown={() => handleMouseDown(r, c)}
-                  onMouseUp={(e) => handleMouseUp(e, r, c)}
+                  onMouseUp={() => handleMouseUp(r, c)}
                 >
                   <img src={closedImg} alt="cell" />
                 </button>
@@ -136,7 +150,7 @@ export function GameBoard() {
             key={`${r}-${c}`}
             className="cell"
             onMouseDown={() => handleMouseDown(r, c)}
-            onMouseUp={(e) => handleMouseUp(e, r, c)}
+            onMouseUp={() => handleMouseUp(r, c)}
             onContextMenu={(e) => handleCellRightClick(e, r, c)}
           >
             <img
