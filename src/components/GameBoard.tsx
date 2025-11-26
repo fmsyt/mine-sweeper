@@ -65,8 +65,15 @@ const getCellImage = (
 };
 
 export function GameBoard() {
-  const { board, rows, cols, gameOver, handleCellClick, handleCellRightClick } =
-    useGame();
+  const {
+    board,
+    rows,
+    cols,
+    gameOver,
+    animatingFlags,
+    handleCellClick,
+    handleCellRightClick,
+  } = useGame();
   const mouseDownTime = useRef<number | null>(null);
   const mouseDownCell = useRef<{ r: number; c: number } | null>(null);
   const longPressTimer = useRef<number | null>(null);
@@ -80,7 +87,7 @@ export function GameBoard() {
     longPressTimer.current = window.setTimeout(() => {
       longPressTriggered.current = true;
       const syntheticEvent = {
-        preventDefault: () => {},
+        preventDefault: () => { },
       } as React.MouseEvent;
       handleCellRightClick(syntheticEvent, r, c);
     }, 500);
@@ -145,21 +152,28 @@ export function GameBoard() {
       }}
     >
       {board.map((row, r) =>
-        row.map((cell, c) => (
-          <button
-            type="button"
-            key={`${r}-${c}`}
-            className="cell"
-            onPointerDown={() => handleMouseDown(r, c)}
-            onPointerUp={() => handleMouseUp(r, c)}
-            onContextMenu={(e) => handleCellRightClick(e, r, c)}
-          >
-            <img
-              src={getCellImage(cell, r, c, board, gameOver, rows)}
-              alt="cell"
-            />
-          </button>
-        )),
+        row.map((cell, c) => {
+          const cellKey = `${r}-${c}`;
+          const isAnimating = animatingFlags.has(cellKey);
+          return (
+            <button
+              type="button"
+              key={cellKey}
+              className="cell"
+              onPointerDown={() => handleMouseDown(r, c)}
+              onPointerUp={() => handleMouseUp(r, c)}
+              onContextMenu={(e) => handleCellRightClick(e, r, c)}
+            >
+              <img
+                src={getCellImage(cell, r, c, board, gameOver, rows)}
+                alt="cell"
+                className={
+                  isAnimating && cell.state === "flagged" ? "flag-drop" : ""
+                }
+              />
+            </button>
+          );
+        }),
       )}
     </div>
   );
