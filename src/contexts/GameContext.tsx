@@ -47,7 +47,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [flagCount, setFlagCount] = useState(0);
 
   useEffect(() => {
-    if (!board || gameOver || gameWon || firstClick) {
+    if (gameOver || gameWon || firstClick) {
       return;
     }
 
@@ -56,7 +56,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [board, gameOver, gameWon, firstClick]);
+  }, [gameOver, gameWon, firstClick]);
 
   const handleDifficultyChange = (newDifficulty: Difficulty) => {
     setDifficulty(newDifficulty);
