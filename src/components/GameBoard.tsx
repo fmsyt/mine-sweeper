@@ -197,6 +197,7 @@ export function GameBoard() {
               }}
               onPointerDown={(e) => {
                 if (e.pointerType === "mouse") {
+                  // onMouseDownで処理しているので無視
                   return;
                 }
                 e.preventDefault();
@@ -204,6 +205,7 @@ export function GameBoard() {
               }}
               onPointerUp={(e) => {
                 if (e.pointerType === "mouse") {
+                  // onMouseUpで処理しているので無視
                   return;
                 }
                 e.preventDefault();
