@@ -183,8 +183,6 @@ export function GameBoard() {
                 const button = lastMouseButtonRef.current;
                 lastMouseButtonRef.current = null;
 
-                console.log("Mouse up", lastMouseButtonRef.current);
-
                 switch (button) {
                   case 0: // 左クリック
                     handlePointerUp(r, c);
