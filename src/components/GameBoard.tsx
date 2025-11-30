@@ -80,6 +80,8 @@ export function GameBoard() {
   const longPressTimer = useRef<number | null>(null);
   const longPressTriggered = useRef<boolean>(false);
 
+  const lastMouseButtonRef = useRef<number | null>(null);
+
   const handlePointerDown = (r: number, c: number) => {
     mouseDownTime.current = Date.now();
     mouseDownCell.current = { r, c };
@@ -170,13 +172,27 @@ export function GameBoard() {
               key={cellKey}
               className="cell"
               onMouseDown={(e) => {
+                lastMouseButtonRef.current = e.button;
                 handlePointerDown(r, c);
               }}
               onMouseUp={(e) => {
-                if (e.button === 2) {
-                  handleMouseUp(r, c);
-                } else {
-                  handlePointerUp(r, c);
+                if (lastMouseButtonRef.current === null) {
+                  return;
+                }
+
+                const button = lastMouseButtonRef.current;
+                lastMouseButtonRef.current = null;
+
+                console.log("Mouse up", lastMouseButtonRef.current);
+
+                switch (button) {
+                  case 0: // 左クリック
+                    handlePointerUp(r, c);
+                    break;
+
+                  case 2: // 右クリック
+                    handleMouseUp(r, c);
+                    break;
                 }
               }}
               onPointerDown={(e) => {
